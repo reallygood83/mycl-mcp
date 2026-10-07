@@ -1,8 +1,38 @@
-# Mycl MCP (developer preview)
+# Mycl WebMCP (browser integration preview)
 
-An MCP adapter for finding Mycl AI work tools, running an authorized tool, reading its actual result, and opening or exporting a saved document. Runs as local stdio for coding agents or as **loopback-only** Streamable HTTP for development.
+`web/mycl-webmcp.js` registers browser WebMCP tools on an open Mycl page with `document.modelContext.registerTool`. It connects to the page's **existing** search, execute, result, editor, and export functions. No new Mycl API is required if those functions already exist in the web app. The previously released remote MCP adapter remains in `src/` as a separate experimental path.
 
-**Status: integration preview, not a live Mycl connector.** This repository does not contain the Mycl production source, user authorization contract, or validated API endpoints. The `/mcp/...` backend paths below are a proposed contract; they are not asserted to exist on `mycl.io`. No sample results are returned when the backend is missing. Do not submit the HTTP listener to public connector directories or tunnel it to the internet: it uses one configured account token and has no multi-user OAuth flow.
+**Status: browser integration preview, not deployed on mycl.io.** This repository does not contain the Mycl production frontend. The browser module only registers callbacks supplied by that frontend; it does not manufacture an execution result or convert a document to HWP/HWPX. WebMCP tools exist only while the page is open and supported by the browser agent. Codex/Claude Code/Grok remote MCP clients do not automatically discover these page tools.
+
+## Add WebMCP to the Mycl frontend
+
+Import the module from the Mycl frontend build and pass its existing authorized functions. The code below is a **contract example**; replace the function references with verified Mycl frontend functions, not a new set of guessed HTTP endpoints.
+
+```js
+import { installMyclWebMcp } from './mycl-webmcp.js';
+
+await installMyclWebMcp({
+  document,
+  app: {
+    searchTools: ({ query, limit, useJev, signal }) => myclSearchTools({ query, limit, useJev, signal }),
+    runTool: ({ toolId, inputs, signal }) => myclRunTool({ toolId, inputs, signal }),
+    getResult: ({ jobId, signal }) => myclGetResult({ jobId, signal }),
+    openEditor: ({ resultId, signal }) => myclOpenEditor({ resultId, signal }),
+    exportDocument: ({ documentId, format, signal }) => myclExportDocument({ documentId, format, signal })
+  },
+  approve: (action, details) => myclConfirmAction(action, details)
+});
+```
+
+The frontend must return `{ tools: [...] }` for search; `{ status: 'pending', jobId }`, `{ status: 'completed', result }`, or `{ status: 'failed', ... }` for execution/results; `{ status: 'opened' }` after actual editor navigation; and `{ status: 'ready', url }` only after the existing exporter produced a downloadable file. Registering callbacks alone does not grant permissions: each frontend function must use the logged-in user's existing authorization and backend checks. No write action runs without a positive `approve` callback. When a feature is unavailable, omit its callback and its WebMCP tool will not be registered. Jev is optional and `useJev` is only passed through if the frontend supports it. Add this module to the actual Mycl deployment to make it visible on mycl.io; copying it into this repository alone does not change the live site.
+
+The separate local `/Users/moon/Documents/MYCL` static demo already exposes limited WebMCP search/navigation tools. That demo is not the production site and has no verified AI-work-tool execution or HWP/HWPX export. The new module deliberately does not report those operations as successful without results from the host application.
+
+To verify the real integration, open the **deployed** Mycl page in a WebMCP-enabled browser agent and inspect `await document.modelContext.getTools()`. Exercise an authorized tool with a test account, read its actual result, then save and reopen a document. The Node tests below replace `document.modelContext` and the host functions with fakes; passing them does not prove the production site or a browser agent supports the tools.
+
+## Legacy remote MCP adapter (separate from WebMCP)
+
+An MCP adapter in `src/` proposes remote/backend tools for coding agents. Its API paths have not been validated on the Mycl service. Do not confuse this with the browser integration above.
 
 ## Setup
 
@@ -32,13 +62,15 @@ The URL returned by the last two calls must be HTTPS and on the configured Mycl 
 
 `npm run check && npm test && npm audit --omit=dev`
 
-The tests use an in-memory fake backend and prove MCP discovery, search, execution, result retrieval, export, schema rejection, and untrusted-URL rejection. They do not prove a real Mycl tool ran, file opened, or any third-party client connected. Before a production release, replace the proposed backend paths with inspected Mycl APIs, enforce per-user authorization, and run cross-tenant and actual HWP/HWPX round-trip tests.
+The browser tests verify WebMCP registration, search, execution, actual-result reporting, missing-feature handling, and approval refusal against a mocked page. The remote MCP tests use an in-memory fake backend. They do not prove a real Mycl tool ran, a file opened, or any third-party client connected. Before a production release, wire the browser module into the Mycl frontend and run user/tenant permission and actual HWP/HWPX round-trip tests.
 
 ## References
 
 - [MCP official TypeScript SDK v2](https://github.com/modelcontextprotocol/typescript-sdk) (Apache-2.0)
 - [MCP specification](https://modelcontextprotocol.io/specification/2026-07-28) (tool discovery, transports, authorization)
 - [Chrome: WebMCP vs MCP](https://developer.chrome.com/docs/ai/webmcp/compare-mcp)
+- [Chrome: WebMCP Imperative API](https://developer.chrome.com/docs/ai/webmcp/imperative-api)
+- [Chrome: WebMCP tool security](https://developer.chrome.com/docs/ai/webmcp/secure-tools)
 - [OpenAI Codex MCP configuration](https://developers.openai.com/codex/mcp)
 - [Claude Code MCP configuration](https://code.claude.com/docs/en/mcp)
 - [Grok custom MCP connectors](https://docs.x.ai/grok/connectors)
