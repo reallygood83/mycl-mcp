@@ -5,7 +5,7 @@ const id = z.string().trim().min(1).max(200);
 const result = value => ({ content: [{ type: 'text', text: JSON.stringify(value) }], structuredContent: value });
 
 export function createMyclServer(api) {
-  const server = new McpServer({ name: 'mycl-mcp', version: '0.2.0-alpha.1' });
+  const server = new McpServer({ name: 'mycl-mcp', version: '0.2.0-alpha.2' });
   const add = (name, description, inputSchema, action, readOnly = true) => {
     server.registerTool(name, { description, inputSchema, annotations: { readOnlyHint: readOnly, destructiveHint: false } }, async args => {
       try { return result(await action(args)); }

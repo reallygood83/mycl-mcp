@@ -4,6 +4,12 @@
 
 **Status: browser integration preview, not deployed on mycl.io.** This repository does not contain the Mycl production frontend. The browser module only registers callbacks supplied by that frontend; it does not manufacture an execution result or convert a document to HWP/HWPX. WebMCP tools exist only while the page is open and supported by the browser agent. Codex/Claude Code/Grok remote MCP clients do not automatically discover these page tools.
 
+## Try it now without a Mycl API
+
+From this repository run `python3 -m http.server 4178 --bind 127.0.0.1`, then open `http://127.0.0.1:4178/demo/`. Use the Korean buttons to find a sample work tool, create a local draft, inspect the result, edit it, save it in this browser, and reopen it. The page explicitly identifies whether the browser is using native WebMCP or the local simulator. No actual Mycl account, AI generation, HWP/HWPX file, or production service is involved.
+
+For a native Chrome WebMCP test, enable `chrome://flags/#enable-webmcp-testing` in a separate Chrome profile and relaunch it. On the demo page, confirm that it says **브라우저 기본 WebMCP 사용 중**. A browser agent can then discover the four tools and call `mycl_search_tools`, `mycl_run_tool`, `mycl_get_result`, and `mycl_open_editor`. The demo's buttons call the same app functions directly; they are not a substitute for testing an agent-issued WebMCP call. The document save button writes only to localStorage in this demo. File export is absent because no Mycl exporter was supplied.
+
 ## Add WebMCP to the Mycl frontend
 
 Import the module from the Mycl frontend build and pass its existing authorized functions. The code below is a **contract example**; replace the function references with verified Mycl frontend functions, not a new set of guessed HTTP endpoints.
@@ -15,7 +21,7 @@ await installMyclWebMcp({
   document,
   app: {
     searchTools: ({ query, limit, useJev, signal }) => myclSearchTools({ query, limit, useJev, signal }),
-    runTool: ({ toolId, inputs, signal }) => myclRunTool({ toolId, inputs, signal }),
+    runTool: ({ toolId, signal }) => myclRunToolFromCurrentPage({ toolId, signal }),
     getResult: ({ jobId, signal }) => myclGetResult({ jobId, signal }),
     openEditor: ({ resultId, signal }) => myclOpenEditor({ resultId, signal }),
     exportDocument: ({ documentId, format, signal }) => myclExportDocument({ documentId, format, signal })

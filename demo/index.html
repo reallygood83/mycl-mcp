@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="icon" href="data:," />
+  <title>Mycl WebMCP 로컬 체험</title>
+  <style>
+    :root { font: 16px/1.55 system-ui, sans-serif; color: #18302e; background: #f5f7f5; }
+    body { max-width: 760px; margin: 36px auto; padding: 0 20px; }
+    h1 { font-size: 2rem; margin-bottom: .2rem; }
+    p { color: #4e6260; }
+    .card { background: white; border: 1px solid #d8e1dc; border-radius: 14px; padding: 22px; margin: 20px 0; }
+    label { display: block; font-weight: 600; margin: 12px 0; }
+    input, textarea { display: block; width: 100%; box-sizing: border-box; border: 1px solid #b5c6bf; border-radius: 8px; padding: 10px; font: inherit; }
+    textarea { min-height: 150px; }
+    button { border: 0; border-radius: 8px; background: #136b56; color: white; padding: 10px 14px; font: inherit; cursor: pointer; margin: 4px 6px 4px 0; }
+    button:disabled { background: #a1aea9; cursor: not-allowed; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; background: #edf4f0; border-radius: 8px; padding: 14px; }
+    small { color: #586b66; }
+  </style>
+</head>
+<body>
+  <h1>Mycl WebMCP 로컬 체험</h1>
+  <p>실제 마이클 계정이나 서버를 사용하지 않는 브라우저 내부 데모입니다. 브라우저 에이전트는 등록된 WebMCP 도구를 사용하고, 페이지 버튼은 같은 작업 함수를 직접 사용합니다.</p>
+  <div class="card"><strong id="mode">WebMCP 확인 중…</strong><p id="guide"></p><small id="registered"></small></div>
+  <div class="card">
+    <label for="task">하려는 업무</label><input id="task" value="현장체험학습 가정통신문 만들기" />
+    <button id="search">1. 도구 검색</button>
+    <label for="tool">실행할 도구 ID</label><input id="tool" value="family-letter" />
+    <label for="details">입력 내용</label><input id="details" value="3학년, 10월 현장체험학습 안내" />
+    <button id="run">2. 실행</button><button id="result" disabled>3. 결과 확인</button><button id="open" disabled>4. 편집기 열기</button>
+  </div>
+  <div class="card" id="editor" hidden>
+    <label for="paper">문서 초안 직접 수정</label><textarea id="paper"></textarea>
+    <button id="save">5. 브라우저에 저장</button><small id="saved"></small>
+  </div>
+  <div class="card"><strong>도구 응답</strong><pre id="output" role="status">버튼을 눌러 시작하세요.</pre></div>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>

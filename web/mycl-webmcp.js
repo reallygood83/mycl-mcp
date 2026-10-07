@@ -40,13 +40,12 @@ export async function installMyclWebMcp({ document, app, approve }) {
   if (typeof app.runTool === 'function') {
     await add('mycl_run_tool', '선택한 Mycl AI 업무도구를 실행합니다. 크레딧이 사용될 수 있으므로 확인이 필요합니다.', {
       type: 'object', properties: {
-        toolId: { type: 'string', minLength: 1, maxLength: 200 },
-        inputs: { type: 'object', additionalProperties: true }
-      }, required: ['toolId', 'inputs']
-    }, async ({ toolId, inputs }, { signal } = {}) => {
-      if (!identifier(toolId) || !object(inputs)) throw new TypeError('Invalid tool execution input');
-      if (!(await approved('mycl_run_tool', { toolId, inputs }))) return asText({ status: 'cancelled' });
-      const outcome = await app.runTool({ toolId, inputs, signal });
+        toolId: { type: 'string', minLength: 1, maxLength: 200 }
+      }, required: ['toolId']
+    }, async ({ toolId }, { signal } = {}) => {
+      if (!identifier(toolId)) throw new TypeError('Invalid tool execution input');
+      if (!(await approved('mycl_run_tool', { toolId }))) return asText({ status: 'cancelled' });
+      const outcome = await app.runTool({ toolId, signal });
       if (!object(outcome) || !['pending', 'completed', 'failed'].includes(outcome.status) || (outcome.status === 'completed' && !('result' in outcome))) {
         throw new Error('Mycl did not return a valid execution result');
       }

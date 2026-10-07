@@ -1,6 +1,6 @@
 {
   "name": "mycl-mcp",
-  "version": "0.2.0-alpha.1",
+  "version": "0.2.0-alpha.2",
   "private": true,
   "type": "module",
   "engines": {
@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/cli.js",
     "test": "node --test",
-    "check": "node --check web/mycl-webmcp.js && node --check src/cli.js && node --check src/server.js && node --check src/mycl-api.js && node --check test/server.test.js && node --check test/webmcp.test.js"
+    "check": "node --check web/mycl-webmcp.js && node --check demo/app.js && node --check src/cli.js && node --check src/server.js && node --check src/mycl-api.js && node --check test/server.test.js && node --check test/webmcp.test.js"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.1.1",
